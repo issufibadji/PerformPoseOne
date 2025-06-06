@@ -1,0 +1,27 @@
+# Ignorar arquivos grandes de pesos
+checkpoints/*.pth
+yolov8n.pt
+
+# Ignorar diretórios de resultados ou saídas
+work_dirs/
+vis_results/
+
+# Ignorar arquivos temporários / caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.sqlite3
+*.log
+
+# Ignorar ambientes virtuais
+venv/
+.venv/
+env/
+.env/
+
+# Ignorar arquivos do sistema/editor
+.DS_Store
+.idea/
+.vscode/
