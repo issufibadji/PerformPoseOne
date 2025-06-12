@@ -12,6 +12,9 @@ Para utilizar o pipeline com 12 pontos:
 
 1. Converta suas anotações para o formato COCO contendo apenas as
    12 chaves definidas em `coco_12.py`.
-2. Treine o modelo usando a configuração personalizada acima.
-3. Execute `run_yolo_mmpose.py` ou `run_yolo_mmpose1.py`, que já
-   apontam para a nova configuração.
+2. Treine o modelo usando a configuração personalizada acima ou
+   utilize os scripts de demonstração que filtram o modelo COCO
+   pré-treinado para apenas 12 pontos.
+3. Execute `run_yolo_mmpose.py` ou `run_yolo_mmpose1.py`. Eles
+   carregam o modelo COCO de 17 pontos e convertem as predições
+   para o conjunto de 12 pontos definido em `coco_12.py`.
