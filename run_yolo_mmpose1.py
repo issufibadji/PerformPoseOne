@@ -28,8 +28,6 @@ bboxes = results.boxes.xyxy.cpu().numpy()
 
 # 3) Inicializar o modelo de pose
 pose_model = init_pose_model(POSE_CONFIG, POSE_CHECKPOINT, device=DEVICE)
-pose_model.dataset_meta = parse_pose_metainfo(
-    dict(from_file='configs/_base_/datasets/coco_12.py'))
 
 # 4) Inferência top-down de pose
 # MMPose espera lista de dicts com chave 'bbox'
@@ -47,6 +45,10 @@ pose_results, _ = inference_top_down_pose_model(
 for res in pose_results:
     res.pred_instances.keypoints = res.pred_instances.keypoints[:, COCO_TO_CUSTOM12, :]
     res.pred_instances.keypoint_scores = res.pred_instances.keypoint_scores[:, COCO_TO_CUSTOM12]
+
+# Usa metainfo de 12 pontos apenas para visualização
+pose_model.dataset_meta = parse_pose_metainfo(
+    dict(from_file='configs/_base_/datasets/coco_12.py'))
 
 # 5) Visualizar e salvar
 img = mmcv.imread(IMG_PATH)
