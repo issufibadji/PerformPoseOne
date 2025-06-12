@@ -14,7 +14,7 @@ IMG_PATH = 'tests/data/coco/000000000785.jpg'
 YOLO_MODEL = 'yolov8n.pt'
 
 # MMPose config + checkpoint (COCO 256×192)
-POSE_CONFIG = 'configs/body_2d_keypoint/topdown_heatmap/coco/td-hm_hrnet-w48_8xb32-210e_coco-256x192.py'
+POSE_CONFIG = 'configs/body_2d_keypoint/topdown_heatmap/custom/td-hm_hrnet-w48_8xb32-210e_custom12-256x192.py'
 POSE_CHECKPOINT = 'checkpoints/hrnet_w48_coco_256x192.pth'
 
 DEVICE = 'cpu'
