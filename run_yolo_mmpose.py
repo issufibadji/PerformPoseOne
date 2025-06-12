@@ -35,8 +35,7 @@ pose_results = inference_topdown(
     pose_model,
     IMG_PATH,
     person_results,
-    bbox_format='xyxy',
-    dataset='TopDownCocoDataset'
+    bbox_format='xyxy'
 )
 
 # 5) Visualizar e salvar só o esqueleto
