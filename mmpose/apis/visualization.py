@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from copy import deepcopy
-from typing import Union
+from typing import List, Union
 
 import mmcv
 import numpy as np
@@ -80,3 +80,56 @@ def visualize(
         kpt_thr=kpt_thr)
 
     return visualizer.get_image()
+
+
+def vis_pose_result(
+    model,
+    img: Union[np.ndarray, str],
+    result: List[PoseDataSample],
+    radius: int = 4,
+    thickness: int = 1,
+    kpt_score_thr: float = 0.3,
+    show: bool = False,
+    draw_heatmap: bool = False,
+    alpha: float = 1.0,
+    skeleton_style: str = 'mmpose',
+) -> np.ndarray:
+    """A compatibility wrapper of the deprecated ``vis_pose_result`` API.
+
+    Args:
+        model: The pose estimator model. Only ``model.dataset_meta`` is used.
+        img (str | np.ndarray): Image file or array to draw.
+        result (list[PoseDataSample]): Inference results from
+            :func:`inference_topdown`.
+        radius (int): Keypoint radius. Defaults to 4.
+        thickness (int): Link thickness. Defaults to 1.
+        kpt_score_thr (float): Threshold of keypoint scores. Defaults to 0.3.
+        show (bool): Whether to show the image. Defaults to False.
+        draw_heatmap (bool): Unused. For compatibility only.
+        alpha (float): Transparency of the drawn results. Defaults to 1.0.
+        skeleton_style (str): Skeleton style. Defaults to ``'mmpose'``.
+
+    Returns:
+        np.ndarray: The visualized image in ``RGB`` format.
+    """
+
+    if not isinstance(result, list):
+        result = [result]
+
+    keypoints = np.stack([r.pred_instances.keypoints[0] for r in result])
+    scores = np.stack([r.pred_instances.keypoint_scores[0] for r in result])
+
+    visualizer = PoseLocalVisualizer(
+        radius=radius, line_width=thickness, alpha=alpha)
+
+    return visualize(
+        img,
+        keypoints,
+        scores,
+        metainfo=getattr(model, 'dataset_meta', None),
+        visualizer=visualizer,
+        show_kpt_idx=False,
+        skeleton_style=skeleton_style,
+        show=show,
+        kpt_thr=kpt_score_thr,
+    )
