@@ -29,12 +29,13 @@ scores = results.boxes.conf.cpu().numpy()
 pose_model = init_model(POSE_CONFIG, POSE_CHECKPOINT, device=DEVICE)
 
 # 4) Inferência top-down de pose
-person_results = [{'bbox': b, 'bbox_score': s}
-                  for b, s in zip(bboxes, scores)]
+# A função ``inference_topdown`` espera receber apenas as caixas de
+# delimitação (bboxes) ou ``None``. A pontuação de detecção não é
+# necessária, portanto passamos somente ``bboxes``.
 pose_results = inference_topdown(
     pose_model,
     IMG_PATH,
-    person_results,
+    bboxes,
     bbox_format='xyxy'
 )
 
