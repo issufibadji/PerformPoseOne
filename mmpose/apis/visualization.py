@@ -49,7 +49,10 @@ def visualize(
     if isinstance(metainfo, str):
         metainfo = parse_pose_metainfo(dict(from_file=metainfo))
     elif isinstance(metainfo, dict):
-        metainfo = parse_pose_metainfo(metainfo)
+        # ``metainfo`` may already be parsed by ``init_model``. Only parse
+        # again when it contains raw keys such as ``keypoint_info``.
+        if 'keypoint_info' in metainfo:
+            metainfo = parse_pose_metainfo(metainfo)
 
     if metainfo is not None:
         visualizer.set_dataset_meta(metainfo, skeleton_style=skeleton_style)
