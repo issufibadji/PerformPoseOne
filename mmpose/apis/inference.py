@@ -261,3 +261,42 @@ def collect_multi_frames(video, frame_id, indices, online=False):
         frames.append(video[support_idx])
 
     return frames
+
+
+def init_pose_model(config: Union[str, Path, Config],
+                    checkpoint: Optional[str] = None,
+                    device: str = 'cuda:0',
+                    cfg_options: Optional[dict] = None) -> nn.Module:
+    """Compatibility wrapper for the deprecated ``init_pose_model`` API."""
+    warnings.warn(
+        '``init_pose_model`` is deprecated. Please use ``init_model``',
+        DeprecationWarning)
+    return init_model(config, checkpoint, device=device,
+                      cfg_options=cfg_options)
+
+
+def inference_top_down_pose_model(model: nn.Module,
+                                   img: Union[np.ndarray, str],
+                                   person_results: Optional[List[dict]] = None,
+                                   bbox_thr: Optional[float] = None,
+                                   format: str = 'xyxy',
+                                   dataset: Optional[str] = None,
+                                   return_heatmap: bool = False,
+                                   outputs: Optional[List[str]] = None):
+    """Compatibility wrapper for the deprecated
+    ``inference_top_down_pose_model`` API."""
+    warnings.warn(
+        '``inference_top_down_pose_model`` is deprecated. '
+        'Please use ``inference_topdown``',
+        DeprecationWarning)
+
+    if person_results is not None:
+        bboxes = np.array([res['bbox'] for res in person_results])
+    else:
+        bboxes = None
+
+    results = inference_topdown(model, img, bboxes, bbox_format=format)
+
+    # The legacy API returns a tuple ``(results, None)`` where the second
+    # element is reserved for network outputs.
+    return results, None
