@@ -2,8 +2,8 @@
 
 import mmcv
 from ultralytics import YOLO
-# imports corrigidos:
 from mmpose.apis import init_model, inference_topdown, vis_pose_result
+from mmpose.datasets.datasets.utils import parse_pose_metainfo
 
 
 # 1) Configurações
@@ -13,11 +13,15 @@ IMG_PATH = 'tests/data/coco/000000000785.jpg'
 YOLO_MODEL = 'yolov8n.pt'
 
 # MMPose config + checkpoint (COCO 256×192)
-POSE_CONFIG = 'configs/body_2d_keypoint/topdown_heatmap/custom/td-hm_hrnet-w48_8xb32-210e_custom12-256x192.py'
-POSE_CHECKPOINT = 'checkpoints/hrnet_w48_coco_256x192.pth'
+POSE_CONFIG = 'configs/body_2d_keypoint/topdown_heatmap/coco/td-hm_hrnet-w48_8xb32-210e_coco-256x192.py'
+POSE_CHECKPOINT = 'https://download.openmmlab.com/mmpose/v1/body_2d_keypoint/topdown_heatmap/coco/td-hm_hrnet-w48_8xb32-210e_coco-256x192-0e67c616_20220913.pth'
 
 DEVICE = 'cpu'
 OUT_FILE = 'vis_results/coco_785_pipeline.jpg'
+
+# Índices dos 12 pontos que queremos (ombros, cotovelos, punhos,
+# quadris, joelhos e tornozelos) no modelo COCO de 17 pontos
+COCO_TO_CUSTOM12 = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
 
 # 2) Detectar pessoas com YOLOv8
 yolo = YOLO(YOLO_MODEL)
@@ -27,6 +31,9 @@ scores = results.boxes.conf.cpu().numpy()
 
 # 3) Inicializar o modelo de pose
 pose_model = init_model(POSE_CONFIG, POSE_CHECKPOINT, device=DEVICE)
+# Substitui metainfo do COCO padrão por metainfo de 12 pontos
+pose_model.dataset_meta = parse_pose_metainfo(
+    dict(from_file='configs/_base_/datasets/coco_12.py'))
 
 # 4) Inferência top-down de pose
 # A função ``inference_topdown`` espera receber apenas as caixas de
@@ -38,6 +45,11 @@ pose_results = inference_topdown(
     bboxes,
     bbox_format='xyxy'
 )
+
+# Filtra as chaves do modelo COCO para apenas 12 pontos
+for res in pose_results:
+    res.pred_instances.keypoints = res.pred_instances.keypoints[:, COCO_TO_CUSTOM12, :]
+    res.pred_instances.keypoint_scores = res.pred_instances.keypoint_scores[:, COCO_TO_CUSTOM12]
 
 # 5) Visualizar e salvar só o esqueleto
 img = mmcv.imread(IMG_PATH)

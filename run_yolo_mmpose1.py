@@ -3,6 +3,7 @@
 import mmcv
 from ultralytics import YOLO
 from mmpose.apis import init_pose_model, inference_top_down_pose_model, vis_pose_result
+from mmpose.datasets.datasets.utils import parse_pose_metainfo
 
 # 1) Configurações
 IMG_PATH = 'tests/data/300w/indoor_020.png'
@@ -11,11 +12,13 @@ IMG_PATH = 'tests/data/300w/indoor_020.png'
 YOLO_MODEL = 'yolov8n.pt'
 
 # MMPose config + checkpoint (COCO 256×192)
-POSE_CONFIG = 'configs/body_2d_keypoint/topdown_heatmap/custom/td-hm_hrnet-w48_8xb32-210e_custom12-256x192.py'
-POSE_CHECKPOINT = 'checkpoints/hrnet_w48_coco_256x192.pth'
+POSE_CONFIG = 'configs/body_2d_keypoint/topdown_heatmap/coco/td-hm_hrnet-w48_8xb32-210e_coco-256x192.py'
+POSE_CHECKPOINT = 'https://download.openmmlab.com/mmpose/v1/body_2d_keypoint/topdown_heatmap/coco/td-hm_hrnet-w48_8xb32-210e_coco-256x192-0e67c616_20220913.pth'
 
 DEVICE = 'cpu'
 OUT_FILE = 'vis_results/indoor_020_pipeline.jpg'
+
+COCO_TO_CUSTOM12 = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
 
 # 2) Detectar pessoas com YOLOv8
 yolo = YOLO(YOLO_MODEL)
@@ -25,19 +28,25 @@ bboxes = results.boxes.xyxy.cpu().numpy()
 
 # 3) Inicializar o modelo de pose
 pose_model = init_pose_model(POSE_CONFIG, POSE_CHECKPOINT, device=DEVICE)
+pose_model.dataset_meta = parse_pose_metainfo(
+    dict(from_file='configs/_base_/datasets/coco_12.py'))
 
 # 4) Inferência top-down de pose
 # MMPose espera lista de dicts com chave 'bbox'
 bboxes_mmpose = [{'bbox': box, 'bbox_score': score}
                  for box, score in zip(bboxes, results.boxes.conf.cpu().numpy())]
 
-pose_results = inference_top_down_pose_model(
+pose_results, _ = inference_top_down_pose_model(
     pose_model,
     IMG_PATH,
     bboxes_mmpose,
     format='xyxy',
     dataset='TopDownCocoDataset'
 )
+
+for res in pose_results:
+    res.pred_instances.keypoints = res.pred_instances.keypoints[:, COCO_TO_CUSTOM12, :]
+    res.pred_instances.keypoint_scores = res.pred_instances.keypoint_scores[:, COCO_TO_CUSTOM12]
 
 # 5) Visualizar e salvar
 img = mmcv.imread(IMG_PATH)
