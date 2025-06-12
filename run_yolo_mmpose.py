@@ -3,8 +3,7 @@
 import mmcv
 from ultralytics import YOLO
 # imports corrigidos:
-from mmpose.apis import init_model, inference_topdown
-from mmpose.apis.visualization import vis_pose_result
+from mmpose.apis import init_model, inference_topdown, vis_pose_result
 
 
 # 1) Configurações
