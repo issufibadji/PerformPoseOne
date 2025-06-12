@@ -31,9 +31,6 @@ scores = results.boxes.conf.cpu().numpy()
 
 # 3) Inicializar o modelo de pose
 pose_model = init_model(POSE_CONFIG, POSE_CHECKPOINT, device=DEVICE)
-# Substitui metainfo do COCO padrão por metainfo de 12 pontos
-pose_model.dataset_meta = parse_pose_metainfo(
-    dict(from_file='configs/_base_/datasets/coco_12.py'))
 
 # 4) Inferência top-down de pose
 # A função ``inference_topdown`` espera receber apenas as caixas de
@@ -50,6 +47,10 @@ pose_results = inference_topdown(
 for res in pose_results:
     res.pred_instances.keypoints = res.pred_instances.keypoints[:, COCO_TO_CUSTOM12, :]
     res.pred_instances.keypoint_scores = res.pred_instances.keypoint_scores[:, COCO_TO_CUSTOM12]
+
+# Usa metainfo de 12 pontos apenas para visualização
+pose_model.dataset_meta = parse_pose_metainfo(
+    dict(from_file='configs/_base_/datasets/coco_12.py'))
 
 # 5) Visualizar e salvar só o esqueleto
 img = mmcv.imread(IMG_PATH)
