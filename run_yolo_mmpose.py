@@ -36,7 +36,7 @@ pose_results = inference_topdown(
     pose_model,
     IMG_PATH,
     person_results,
-    format='xyxy',
+    bbox_format='xyxy',
     dataset='TopDownCocoDataset'
 )
 
